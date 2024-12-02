@@ -1,0 +1,84 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "yarabaladf"
+		},
+		"YarabalaAzureDataLakeStorage1_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'YarabalaAzureDataLakeStorage1'"
+		},
+		"YarabalaAzureDataLakeStorage1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://yarabalaadfstorage.dfs.core.windows.net/"
+		},
+		"TRG_DynCopy_properties_yarabalapipeline1_parameters_FileName": {
+			"type": "string",
+			"defaultValue": "Customer.txt"
+		},
+		"TRG_DynCopy_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/a8aedac9-0492-4e09-a8ba-0cc33703dcd3/resourceGroups/TestRG1/providers/Microsoft.Storage/storageAccounts/yarabalaadfstorage"
+		},
+		"TRG_PL_SQL_IncrementalLoad_properties_yarabalapipeline1_parameters_FileName": {
+			"type": "string",
+			"defaultValue": "@triggerBody{}.fileName"
+		},
+		"TRG_PL_SQL_IncrementalLoad_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/a8aedac9-0492-4e09-a8ba-0cc33703dcd3/resourceGroups/TestRG1/providers/Microsoft.Storage/storageAccounts/yarabalaadfstorage"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "yarabaladf_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"YarabalaAzureDataLakeStorage1_accountKey": {
+						"value": "[parameters('YarabalaAzureDataLakeStorage1_accountKey')]"
+					},
+					"YarabalaAzureDataLakeStorage1_properties_typeProperties_url": {
+						"value": "[parameters('YarabalaAzureDataLakeStorage1_properties_typeProperties_url')]"
+					},
+					"TRG_DynCopy_properties_yarabalapipeline1_parameters_FileName": {
+						"value": "[parameters('TRG_DynCopy_properties_yarabalapipeline1_parameters_FileName')]"
+					},
+					"TRG_DynCopy_properties_typeProperties_scope": {
+						"value": "[parameters('TRG_DynCopy_properties_typeProperties_scope')]"
+					},
+					"TRG_PL_SQL_IncrementalLoad_properties_yarabalapipeline1_parameters_FileName": {
+						"value": "[parameters('TRG_PL_SQL_IncrementalLoad_properties_yarabalapipeline1_parameters_FileName')]"
+					},
+					"TRG_PL_SQL_IncrementalLoad_properties_typeProperties_scope": {
+						"value": "[parameters('TRG_PL_SQL_IncrementalLoad_properties_typeProperties_scope')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

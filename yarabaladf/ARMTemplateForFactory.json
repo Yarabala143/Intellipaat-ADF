@@ -1,0 +1,523 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "yarabaladf"
+		},
+		"YarabalaAzureDataLakeStorage1_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'YarabalaAzureDataLakeStorage1'"
+		},
+		"YarabalaAzureDataLakeStorage1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://yarabalaadfstorage.dfs.core.windows.net/"
+		},
+		"TRG_DynCopy_properties_yarabalapipeline1_parameters_FileName": {
+			"type": "string",
+			"defaultValue": "Customer.txt"
+		},
+		"TRG_DynCopy_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/a8aedac9-0492-4e09-a8ba-0cc33703dcd3/resourceGroups/TestRG1/providers/Microsoft.Storage/storageAccounts/yarabalaadfstorage"
+		},
+		"TRG_PL_SQL_IncrementalLoad_properties_yarabalapipeline1_parameters_FileName": {
+			"type": "string",
+			"defaultValue": "@triggerBody{}.fileName"
+		},
+		"TRG_PL_SQL_IncrementalLoad_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/a8aedac9-0492-4e09-a8ba-0cc33703dcd3/resourceGroups/TestRG1/providers/Microsoft.Storage/storageAccounts/yarabalaadfstorage"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/yarabalapipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy Dynamic data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings",
+									"copyBehavior": "PreserveHierarchy"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "yarabaladataset1",
+								"type": "DatasetReference",
+								"parameters": {
+									"FileName": {
+										"value": "@pipeline().parameters.FileName",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "yarabaladataset2",
+								"type": "DatasetReference",
+								"parameters": {
+									"FileName": {
+										"value": "@pipeline().parameters.FileName",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-12-02T07:36:12Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/yarabaladataset1')]",
+				"[concat(variables('factoryId'), '/datasets/yarabaladataset2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_adls2_innvan_oldb_Customer')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "YarabalaAzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Customer.txt",
+						"folderPath": "oldb",
+						"fileSystem": "ssodcdata"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "CustomerCode",
+						"type": "String"
+					},
+					{
+						"name": " CustomerName",
+						"type": "String"
+					},
+					{
+						"name": " Address",
+						"type": "String"
+					},
+					{
+						"name": " PhoneNumber",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/YarabalaAzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_adlsn2_innvan_oldb')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "YarabalaAzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "PurchaseOrder.txt",
+						"folderPath": "oldb",
+						"fileSystem": "ssodcdata"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "PurchaseOrderID",
+						"type": "String"
+					},
+					{
+						"name": " CustomerCode",
+						"type": "String"
+					},
+					{
+						"name": "ProductCode",
+						"type": "String"
+					},
+					{
+						"name": "EmployeeCode",
+						"type": "String"
+					},
+					{
+						"name": " PuchaseOrderDate",
+						"type": "String"
+					},
+					{
+						"name": " Quantity",
+						"type": "String"
+					},
+					{
+						"name": " UnitPrice",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/YarabalaAzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Yarabalaoutput')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "YarabalaAzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "output",
+						"folderPath": "oldb/output",
+						"fileSystem": "ssodcdata"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/YarabalaAzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/yarabaladataset1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "YarabalaAzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Customer.txt",
+						"folderPath": "source",
+						"fileSystem": "ssodcdata"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/YarabalaAzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/yarabaladataset2')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "YarabalaAzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "target",
+						"fileSystem": "ssodcdata"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/YarabalaAzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/YarabalaAzureDataLakeStorage1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('YarabalaAzureDataLakeStorage1_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('YarabalaAzureDataLakeStorage1_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TRG_DynCopy')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "yarabalapipeline1",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"FileName": "[parameters('TRG_DynCopy_properties_yarabalapipeline1_parameters_FileName')]"
+						}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/ssodcdata/blobs/source",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('TRG_DynCopy_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/yarabalapipeline1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TRG_PL_SQL_IncrementalLoad')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "yarabalapipeline1",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"FileName": "[parameters('TRG_PL_SQL_IncrementalLoad_properties_yarabalapipeline1_parameters_FileName')]"
+						}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/ssodcdata/blobs/source/",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('TRG_PL_SQL_IncrementalLoad_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/yarabalapipeline1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DF_CustomerPurchases')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_adlsn2_innvan_oldb",
+								"type": "DatasetReference"
+							},
+							"name": "PurchaseOrder"
+						},
+						{
+							"dataset": {
+								"referenceName": "DS_adls2_innvan_oldb_Customer",
+								"type": "DatasetReference"
+							},
+							"name": "Customer"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Yarabalaoutput",
+								"type": "DatasetReference"
+							},
+							"name": "Output"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Purchaseorderselected"
+						},
+						{
+							"name": "CustomerSelected"
+						},
+						{
+							"name": "QualityChecks"
+						},
+						{
+							"name": "joinedStream"
+						},
+						{
+							"name": "CustomerPurchases"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          PurchaseOrderID as string,",
+						"          { CustomerCode} as string,",
+						"          ProductCode as string,",
+						"          EmployeeCode as string,",
+						"          { PuchaseOrderDate} as string,",
+						"          { Quantity} as integer,",
+						"          { UnitPrice} as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> PurchaseOrder",
+						"source(output(",
+						"          CustomerCode as string,",
+						"          { CustomerName} as string,",
+						"          { Address} as string,",
+						"          { PhoneNumber} as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> Customer",
+						"PurchaseOrder select(mapColumn(",
+						"          { CustomerCode},",
+						"          { Quantity}",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> Purchaseorderselected",
+						"Customer select(mapColumn(",
+						"          CustomerCode,",
+						"          { CustomerName}",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> CustomerSelected",
+						"Purchaseorderselected filter(greater({ Quantity},0)) ~> QualityChecks",
+						"QualityChecks, CustomerSelected join({ CustomerCode} == CustomerCode,",
+						"     joinType:'inner',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> joinedStream",
+						"joinedStream aggregate(groupBy({ CustomerCode},",
+						"          { CustomerName}),",
+						"     Quantity = sum({ Quantity})) ~> CustomerPurchases",
+						"CustomerPurchases sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> Output"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_adlsn2_innvan_oldb')]",
+				"[concat(variables('factoryId'), '/datasets/DS_adls2_innvan_oldb_Customer')]",
+				"[concat(variables('factoryId'), '/datasets/Yarabalaoutput')]"
+			]
+		}
+	]
+}

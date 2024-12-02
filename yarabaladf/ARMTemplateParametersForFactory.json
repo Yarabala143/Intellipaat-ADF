@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "yarabaladf"
+		},
+		"YarabalaAzureDataLakeStorage1_accountKey": {
+			"value": ""
+		},
+		"YarabalaAzureDataLakeStorage1_properties_typeProperties_url": {
+			"value": "https://yarabalaadfstorage.dfs.core.windows.net/"
+		},
+		"TRG_DynCopy_properties_yarabalapipeline1_parameters_FileName": {
+			"value": "Customer.txt"
+		},
+		"TRG_DynCopy_properties_typeProperties_scope": {
+			"value": "/subscriptions/a8aedac9-0492-4e09-a8ba-0cc33703dcd3/resourceGroups/TestRG1/providers/Microsoft.Storage/storageAccounts/yarabalaadfstorage"
+		},
+		"TRG_PL_SQL_IncrementalLoad_properties_yarabalapipeline1_parameters_FileName": {
+			"value": "@triggerBody{}.fileName"
+		},
+		"TRG_PL_SQL_IncrementalLoad_properties_typeProperties_scope": {
+			"value": "/subscriptions/a8aedac9-0492-4e09-a8ba-0cc33703dcd3/resourceGroups/TestRG1/providers/Microsoft.Storage/storageAccounts/yarabalaadfstorage"
+		}
+	}
+}
