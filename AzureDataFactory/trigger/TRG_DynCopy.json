@@ -1,0 +1,27 @@
+{
+	"name": "TRG_DynCopy",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "yarabalapipeline1",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"FileName": "Customer.txt"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/ssodcdata/blobs/source",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/a8aedac9-0492-4e09-a8ba-0cc33703dcd3/resourceGroups/TestRG1/providers/Microsoft.Storage/storageAccounts/yarabalaadfstorage",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}

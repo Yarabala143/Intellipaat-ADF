@@ -1,0 +1,9 @@
+{
+	"name": "yarabaladf",
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "83d07192-650c-4a42-afaa-c921b0be6463",
+		"tenantId": "a4e511b2-dcaa-4438-982b-5089f0e90bcc"
+	}
+}
